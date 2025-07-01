@@ -1,22 +1,16 @@
 import os
 import requests
-from dotenv import load_dotenv
 
-"""
-This script reads a .NET C# code file (Program.cs),
-sends the content to OpenRouter for documentation generation,
-and writes the result into an .rst file for Sphinx.
-"""
+# Only load .env if running locally
+if os.getenv("GITHUB_ACTIONS") != "true":
+    from dotenv import load_dotenv
+    load_dotenv()
 
-# Load API key from .env file
-load_dotenv()
+# Read from environment directly
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "mistralai/mistral-7b-instruct:free"
 
 def get_summary(code):
-    """
-    Sends C# code to OpenRouter and returns the AI-generated documentation.
-    """
     prompt = f"""
 You are an expert software architect. Document the following C# class with:
 - Purpose of each method
@@ -26,6 +20,7 @@ You are an expert software architect. Document the following C# class with:
 
 ```csharp
 {code}
+
 ```
 """
     response = requests.post(
