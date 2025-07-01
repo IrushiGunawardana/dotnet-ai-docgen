@@ -10,6 +10,7 @@ if os.getenv("GITHUB_ACTIONS") != "true":
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "mistralai/mistral-7b-instruct:free"
 
+print(" OPENROUTER_API_KEY loaded:", bool(OPENROUTER_API_KEY))
 if not OPENROUTER_API_KEY:
     raise Exception(" Missing OPENROUTER_API_KEY environment variable")
 
