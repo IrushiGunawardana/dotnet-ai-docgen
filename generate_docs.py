@@ -10,6 +10,10 @@ if os.getenv("GITHUB_ACTIONS") != "true":
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "mistralai/mistral-7b-instruct:free"
 
+if not OPENROUTER_API_KEY:
+    raise Exception(" Missing OPENROUTER_API_KEY environment variable")
+
+
 def get_summary(code):
     prompt = f"""
 You are an expert software architect. Document the following C# class with:
@@ -40,7 +44,7 @@ You are an expert software architect. Document the following C# class with:
         data = response.json()
         return data['choices'][0]['message']['content']
     except KeyError:
-        print("❌ API response error!")
+        print("API response error!")
         print("Status code:", response.status_code)
         print("Response JSON:")
         print(response.text)
