@@ -1,36 +1,38 @@
 using System;
 
-namespace CalculatorApp
+namespace StringUtilitiesApp
 {
-    public class Calculator
+    public static class StringUtils
     {
-        // Adds two numbers and returns the result
-        public int Add(int a, int b)
+        public static bool IsPalindrome(string input)
         {
-            return a + b;
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            string normalized = input.Replace(" ", "").ToLower();
+            char[] arr = normalized.ToCharArray();
+            Array.Reverse(arr);
+            return normalized == new string(arr);
         }
 
-        // Subtracts b from a
-        public int Subtract(int a, int b)
+        public static string ReverseWords(string input)
         {
-            return a - b;
+            if (string.IsNullOrWhiteSpace(input)) return input;
+            string[] words = input.Split(' ');
+            Array.Reverse(words);
+            return string.Join(" ", words);
         }
 
-        // Multiplies two numbers
-        public int Multiply(int a, int b)
+        public static int CountVowels(string input)
         {
-            return a * b;
-        }
-
-        // Divides a by b
-        public double Divide(int a, int b)
-        {
-            if (b == 0)
+            if (string.IsNullOrWhiteSpace(input)) return 0;
+            int count = 0;
+            foreach (char c in input.ToLower())
             {
-                throw new DivideByZeroException("Cannot divide by zero.");
+                if ("aeiou".Contains(c))
+                {
+                    count++;
+                }
             }
-
-            return (double)a / b;
+            return count;
         }
     }
 
@@ -38,11 +40,15 @@ namespace CalculatorApp
     {
         static void Main(string[] args)
         {
-            Calculator calc = new Calculator();
-            Console.WriteLine("Add: " + calc.Add(10, 5));
-            Console.WriteLine("Subtract: " + calc.Subtract(10, 5));
-            Console.WriteLine("Multiply: " + calc.Multiply(10, 5));
-            Console.WriteLine("Divide: " + calc.Divide(10, 5));
+            string test = "Madam";
+
+            Console.WriteLine($"Is '{test}' a palindrome? {StringUtils.IsPalindrome(test)}");
+
+            string sentence = "The quick brown fox";
+            Console.WriteLine($"Reversed words: {StringUtils.ReverseWords(sentence)}");
+
+            string text = "OpenAI Documentation Generator";
+            Console.WriteLine($"Vowel count: {StringUtils.CountVowels(text)}");
         }
     }
 }

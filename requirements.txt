@@ -1,5 +1,7 @@
-
 requests
 python-dotenv
 sphinx
 sphinx_rtd_theme
+openai>=1.0.0
+flask
+flask-cors

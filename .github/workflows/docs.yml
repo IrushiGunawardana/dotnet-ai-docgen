@@ -22,10 +22,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Git
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git
+
       - name: Generate AI Documentation
-        run: python generate_docs.py
+        run: python generate_docs.py https://github.com/${{ github.repository }}
         env:
+          # Try Azure OpenAI first, then OpenAI, then OpenRouter
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTIONS: "true"
 
       - name: Build HTML with Sphinx
         run: |

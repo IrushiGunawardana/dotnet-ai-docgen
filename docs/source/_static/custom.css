@@ -1,0 +1,173 @@
+/* Custom CSS for Enhanced Documentation UI */
+
+/* Modern Header with Download Button */
+.wy-side-nav-search {
+    background-color: #2980b9 !important;
+    padding: 1.5em 1em;
+}
+
+.wy-side-nav-search > a {
+    color: #fff !important;
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 0.5em;
+}
+
+/* Download Button */
+.download-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2em;
+    margin: 2em 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.download-section h2 {
+    color: #fff;
+    margin-bottom: 1em;
+    font-size: 1.8em;
+}
+
+.download-buttons {
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.download-btn {
+    background: #fff;
+    color: #667eea;
+    padding: 0.8em 2em;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid #fff;
+    display: inline-block;
+}
+
+.download-btn:hover {
+    background: transparent;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.download-btn i {
+    margin-right: 0.5em;
+}
+
+/* Enhanced Content Area */
+.rst-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2em;
+}
+
+/* Better Code Blocks */
+.highlight {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Modern Cards for Sections */
+.doc-section {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 1.5em;
+    margin: 1.5em 0;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.doc-section:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.doc-section h2 {
+    color: #667eea;
+    margin-top: 0;
+}
+
+/* Better Navigation */
+.wy-nav-side {
+    background: #2c3e50;
+}
+
+.wy-menu-vertical li.current > a {
+    background: #667eea;
+    color: #fff;
+}
+
+.wy-menu-vertical a:hover {
+    background: #34495e;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .download-buttons {
+        flex-direction: column;
+    }
+    
+    .download-btn {
+        width: 100%;
+    }
+}
+
+/* Table of Contents Enhancement */
+.rst-content .toctree-wrapper {
+    background: #f8f9fa;
+    padding: 1.5em;
+    border-radius: 8px;
+    margin: 2em 0;
+}
+
+/* Footer Enhancement */
+.rst-footer-buttons {
+    margin-top: 3em;
+    padding-top: 2em;
+    border-top: 2px solid #e9ecef;
+}
+
+/* Search Enhancement */
+.wy-side-nav-search input[type="text"] {
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.wy-side-nav-search input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Badge for AI Generated */
+.ai-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 0.3em 0.8em;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-left: 0.5em;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Print Styles */
+@media print {
+    .download-section,
+    .wy-nav-side,
+    .wy-breadcrumbs {
+        display: none;
+    }
+}
+
