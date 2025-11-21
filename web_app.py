@@ -71,6 +71,20 @@ html_static_path = ['_static']
     return workspace
 
 
+def install_runtime_dependencies():
+    """Install requirements.txt at runtime (for Vercel builds)."""
+    req_file = Path("requirements.txt")
+    if req_file.exists():
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-r", str(req_file)],
+            capture_output=True,
+            text=True
+        )
+
+
+install_runtime_dependencies()
+
+
 def ensure_package(module_name: str, package_name: Optional[str] = None):
     """Install a missing package at runtime if needed."""
     if importlib.util.find_spec(module_name):
