@@ -15,6 +15,9 @@ from flask import Flask, render_template, request, jsonify, send_from_directory,
 from flask_cors import CORS
 import tempfile
 import shutil
+from typing import Optional
+import importlib.util
+import importlib
 
 # Import our modules
 from github_repo_handler import GitHubRepoHandler
@@ -66,6 +69,19 @@ html_static_path = ['_static']
         conf_dest.write_text(conf_content.strip(), encoding='utf-8')
 
     return workspace
+
+
+def ensure_package(module_name: str, package_name: Optional[str] = None):
+    """Install a missing package at runtime if needed."""
+    if importlib.util.find_spec(module_name):
+        return
+    pkg = package_name or module_name
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", pkg],
+        capture_output=True,
+        text=True,
+        check=True
+    )
 
 
 @app.route('/')
@@ -347,6 +363,7 @@ Welcome to the AI-generated documentation.
         
         # Build HTML
         docs_dir = docs_workspace
+        ensure_package('sphinx')
         result = subprocess.run(
             [sys.executable, "-m", "sphinx", "-b", "html", "source", "build/html"],
             cwd=docs_dir,
