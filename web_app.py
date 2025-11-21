@@ -75,11 +75,15 @@ def install_runtime_dependencies():
     """Install requirements.txt at runtime (for Vercel builds)."""
     req_file = Path("requirements.txt")
     if req_file.exists():
-        subprocess.run(
+        result = subprocess.run(
             [sys.executable, "-m", "pip", "install", "-r", str(req_file)],
-            capture_output=True,
+            check=False,
             text=True
         )
+        if result.returncode != 0:
+            print("Runtime pip install failed:", result.stderr or result.stdout)
+        else:
+            print("Runtime pip install succeeded.")
 
 
 install_runtime_dependencies()
