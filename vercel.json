@@ -12,5 +12,7 @@
       "dest": "web_app.py"
     }
   ]
+  ,
+  "installCommand": "pip install -r requirements.txt"
 }
 
