@@ -40,6 +40,34 @@ generation_status = {
 }
 
 
+def prepare_docs_workspace() -> Path:
+    """Prepare an isolated Sphinx workspace inside a writable temporary directory."""
+    workspace = Path(tempfile.mkdtemp(prefix='docs_web_'))
+    source_dir = workspace / "source"
+    static_dir = source_dir / "_static"
+    templates_dir = source_dir / "_templates"
+
+    source_dir.mkdir(parents=True, exist_ok=True)
+    static_dir.mkdir(exist_ok=True)
+    templates_dir.mkdir(exist_ok=True)
+
+    conf_src = Path("docs/source/conf.py")
+    conf_dest = source_dir / "conf.py"
+    if conf_src.exists():
+        shutil.copy(conf_src, conf_dest)
+    else:
+        conf_content = """
+project = 'DotNet AI Doc'
+release = '1.0'
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+html_theme = 'sphinx_rtd_theme'
+html_static_path = ['_static']
+"""
+        conf_dest.write_text(conf_content.strip(), encoding='utf-8')
+
+    return workspace
+
+
 @app.route('/')
 def index():
     """Serve the main UI."""
@@ -234,11 +262,8 @@ def generate_code_docs_background(code, filename, language='dotnet'):
     global current_docs_dir, generation_status
     
     try:
-        # Create output directory
-        output_dir = Path("docs_web/source")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        (output_dir / "_static").mkdir(exist_ok=True)
-        (output_dir / "_templates").mkdir(exist_ok=True)
+        docs_workspace = prepare_docs_workspace()
+        output_dir = docs_workspace / "source"
         
         # Initialize AI generator
         generator = AIDocGenerator()
@@ -321,7 +346,7 @@ Welcome to the AI-generated documentation.
         generation_status['message'] = 'Building HTML documentation...'
         
         # Build HTML
-        docs_dir = Path("docs_web")
+        docs_dir = docs_workspace
         if os.name != 'nt':
             result = subprocess.run(
                 ["sphinx-build", "-b", "html", "source", "build/html"],
@@ -416,11 +441,8 @@ def generate_docs_background(repo_url, branch, selected_files, language='dotnet'
             if f.relative_path in selected_files
         ]
         
-        # Create output directory
-        output_dir = Path("docs_web/source")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        (output_dir / "_static").mkdir(exist_ok=True)
-        (output_dir / "_templates").mkdir(exist_ok=True)
+        docs_workspace = prepare_docs_workspace()
+        output_dir = docs_workspace / "source"
         
         # Initialize AI generator
         generator = AIDocGenerator()
@@ -516,7 +538,7 @@ def generate_docs_background(repo_url, branch, selected_files, language='dotnet'
         generation_status['message'] = 'Building HTML documentation...'
         generation_status['progress'] = 90
         
-        docs_dir = Path("docs_web")
+        docs_dir = docs_workspace
         if os.name != 'nt':
             result = subprocess.run(
                 ["sphinx-build", "-b", "html", "source", "build/html"],
