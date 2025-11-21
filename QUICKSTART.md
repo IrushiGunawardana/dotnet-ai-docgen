@@ -2,17 +2,17 @@
 
 Get started with DotNet AI DocGen in 5 minutes!
 
+> **For detailed instructions, see [HOW_TO_RUN.md](HOW_TO_RUN.md)**
+
 ## Step 1: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Step 2: Set Up API Key (OPTIONAL - Skip for Free!)
+## Step 2: Set Up API Key (REQUIRED)
 
-**🆓 FREE OPTION: Skip this step!** The tool works without any API keys using free models.
-
-**OR** for better performance, get a free OpenRouter key (2 minutes, no credit card):
+** Get FREE API Key (2 minutes, no credit card):**
 
 1. Sign up at [openrouter.ai](https://openrouter.ai) (free, no credit card)
 2. Get your key at [openrouter.ai/keys](https://openrouter.ai/keys)
@@ -29,7 +29,7 @@ pip install -r requirements.txt
    OPENROUTER_API_KEY=sk-or-v1-your-key-here
    ```
 
-> 🆓 **See [FREE_AI_SETUP.md](FREE_AI_SETUP.md) for complete free setup guide!**
+>  **See [GET_API_KEY.md](GET_API_KEY.md) for step-by-step instructions!**
 
 ## Step 3: Generate Documentation
 
@@ -53,9 +53,9 @@ python serve_docs.py
 ```
 
 This automatically:
-- ✅ Builds the HTML documentation
-- ✅ Starts a web server
-- ✅ Opens your browser
+- Builds the HTML documentation
+- Starts a web server
+- Opens your browser
 
 **Manual way:**
 ```bash
@@ -73,11 +73,11 @@ The documentation opens at `http://localhost:8000` in your browser!
 ## Example Output
 
 The tool will:
-- ✅ Clone the repository
-- ✅ Find all C# files
-- ✅ Generate documentation for each file
-- ✅ Create a project overview
-- ✅ Build searchable HTML documentation
+- Clone the repository
+-Find all C# files
+- Generate documentation for each file
+- Create a project overview
+- Build searchable HTML documentation
 
 ## Troubleshooting
 

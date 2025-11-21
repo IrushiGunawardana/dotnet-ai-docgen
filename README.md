@@ -1,291 +1,132 @@
-# DotNet AI DocGen - Enhanced
+# DotNet AI DocGen
 
-An advanced automated documentation generation tool for .NET projects that connects to GitHub repositories and generates comprehensive technical documentation using AI and Sphinx.
+DotNet AI DocGen is a professional documentation automation platform for .NET, Angular, and HTML/CSS repositories. It clones GitHub projects, parses language-specific files, drives AI models to explain the code, and publishes the result via Sphinx.
 
-**🆓 100% FREE to use!** No API keys required - works automatically with free AI models!
+## System Architecture
 
-## 🚀 Features
+1. **Language-aware parsing** (`language_parser.py`) enumerates C#, TypeScript, HTML, CSS, and JavaScript files, excluding build artifacts. It exposes namespaces, class details, component/service metadata, selectors, templates, scripts, and styles.
+2. **AI layer** (`ai_doc_generator.py`) contains tailored prompts for each language; it calls OpenRouter, Azure OpenAI, or OpenAI in priority order and falls back automatically if a key is missing.
+3. **Input methods** include repository URLs, copy/pasted code, or single-file uploads. Each source is normalized, analyzed, and fed to the same AI pipeline.
+4. **Publishing pipeline** writes reStructuredText files into `docs_web/source`, runs Sphinx to build `docs_web/build/html`, and exposes the viewer via `web_app.py` and `docs_server.py`.
 
-- **🌐 Complete Web UI**: Full browser-based interface - no command line needed!
-  - Enter repo URL and branch
-  - Browse and select files
-  - Generate documentation with one click
-  - View and download results
-- **GitHub Integration**: Automatically clones and analyzes any GitHub repository
-- **Comprehensive .NET Parsing**: Discovers all C# files, classes, methods, interfaces, and enums
-- **Multi-AI Support**: Works with Azure OpenAI, OpenAI, or OpenRouter (with automatic fallback)
-- **Full Documentation Generation**: Creates detailed documentation for entire projects, not just single files
-- **🎨 Modern Web UI**: Beautiful, responsive documentation interface with enhanced styling
-- **📥 Download Features**: Download documentation as PDF, HTML (ZIP), or Markdown
-- **🌐 Auto-Open Browser**: Automatically opens documentation in browser after generation
-- **Sphinx Integration**: Generates beautiful, searchable HTML documentation
-- **Project Overview**: Automatically generates project architecture and overview documentation
-- **GitHub Actions Ready**: Seamless CI/CD integration
+## Features
 
-## 📋 Requirements
+- Language selection that adjusts the parser, metadata extraction, and prompt style.
+- Flexible input channels (GitHub, paste, upload) to match both quick tests and full repository runs.
+- AI-generated overviews for projects, files, classes, methods, and templates.
+- Responsive Sphinx viewer with search and navigation; use your browser to print or save a local copy.
+- CLI (`generate_docs.py`) for automation scripts.
+- CI/CD ready workflow at `.github/workflows/docs.yml`.
+- Supporting documentation captured in the Markdown files referenced below.
 
-- Python 3.8 or higher
-- Git (for repository cloning)
-- **AI API Key: OPTIONAL!** 🆓
-  - **No key needed** - Uses free OpenRouter models automatically!
-  - OpenRouter API key (free, recommended for better performance)
-  - Azure OpenAI (paid, optional)
-  - OpenAI API key (paid, optional)
+## Requirements
 
-## 🛠️ Setup
+1. Python 3.8 or newer.
+2. Git installed and accessible from the command line.
+3. At least one AI key:
+   - OpenRouter (free) — see [GET_API_KEY.md](GET_API_KEY.md)
+   - Azure OpenAI — see [AZURE_OPENAI_SETUP.md](AZURE_OPENAI_SETUP.md)
+   - OpenAI
+4. Optional: `GITHUB_TOKEN` for private repositories.
 
-### Option A: Web UI (Recommended - Easiest!)
+Install dependencies:
 
-**Perfect for interactive use - everything in your browser!**
+```
+pip install -r requirements.txt
+```
+
+## Configuration
+
+Create a `.env` file (ignored by Git) with the keys you intend to use:
+
+```
+OPENROUTER_API_KEY=sk-or-v1-your-key
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_DEPLOYMENT=gpt-4
+OPENAI_API_KEY=sk-...
+GITHUB_TOKEN=ghp-...
+```
+
+Reference the companion guides for deeper information:
+
+- [GET_API_KEY.md](GET_API_KEY.md)
+- [FREE_AI_SETUP.md](FREE_AI_SETUP.md)
+- [AZURE_OPENAI_SETUP.md](AZURE_OPENAI_SETUP.md)
+- [HOW_TO_RUN.md](HOW_TO_RUN.md)
+- [QUICKSTART.md](QUICKSTART.md)
+- [FEATURE_ROADMAP.md](FEATURE_ROADMAP.md)
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
+## Web UI Workflow
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Setup web application
-python setup_web.py
-
-# 3. Start web server
 python web_app.py
 ```
 
-The browser opens automatically at `http://localhost:5000` with a beautiful UI where you can:
-- Enter repository URL and branch
-- Browse and select files
-- Generate documentation
-- View and download results
+1. Navigate to `http://localhost:5000`.
+2. Select the target language (C#, Angular, or HTML/CSS).
+3. Pick an input method (GitHub cluster, paste, or upload).
+4. Generate documentation and monitor the progress indicator.
+5. Click “View Documentation” to open the generated HTML.
+6. Use your browser’s Print/Save dialog to capture a local copy (download buttons were removed to keep dependencies minimal).
 
-**See [README_WEB_UI.md](README_WEB_UI.md) for detailed web UI guide.**
-
-### Option B: Command Line
-
-**For automation and CI/CD:**
-
-### 2. Configure API Keys (OPTIONAL - Works Without Any Keys!)
-
-**🆓 FREE OPTION: No configuration needed!** The tool automatically uses free AI models from OpenRouter.
-
-**OR** create a `.env` file for better performance:
-
-```env
-# Option 1: OpenRouter (FREE - Recommended!)
-# Get free key at: https://openrouter.ai/keys (takes 2 minutes, no credit card)
-OPENROUTER_API_KEY=your_openrouter_api_key
-
-# Option 2: Azure OpenAI (Paid)
-AZURE_OPENAI_API_KEY=your_azure_api_key
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_OPENAI_DEPLOYMENT=gpt-4
-
-# Option 3: OpenAI (Paid)
-OPENAI_API_KEY=your_openai_api_key
-
-# Optional: GitHub Token (for private repos)
-GITHUB_TOKEN=your_github_token
-```
-
-> 🆓 **Want to use it for FREE?** See [FREE_AI_SETUP.md](FREE_AI_SETUP.md) - No API keys needed!
-> 
-> 💰 **Need help with paid options?** See [AZURE_OPENAI_SETUP.md](AZURE_OPENAI_SETUP.md) for Azure OpenAI setup.
-
-The tool will automatically use the first available API in this order:
-1. Azure OpenAI
-2. OpenAI
-3. OpenRouter
-
-### 3. Generate Documentation
-
-#### From Command Line
+## Command Line Usage
 
 ```bash
-# Basic usage
 python generate_docs.py https://github.com/owner/repo-name
-
-# Specify branch
-python generate_docs.py https://github.com/owner/repo-name main
-
-# Or use environment variable
-export GITHUB_REPO_URL=https://github.com/owner/repo-name
-python generate_docs.py
+python generate_docs.py https://github.com/owner/repo-name branch-name
 ```
 
-#### From Environment Variables
+Set `GITHUB_REPO_URL` and `GITHUB_BRANCH` environment variables instead of passing arguments if you prefer automation.
+
+## Viewing Output
 
 ```bash
-export GITHUB_REPO_URL=https://github.com/owner/repo-name
-export GITHUB_BRANCH=main
-python generate_docs.py
-```
-
-### 4. View Documentation (Enhanced Web UI)
-
-**🎯 Automatic - Just run generate_docs.py!**
-```bash
-python generate_docs.py https://github.com/owner/repo
-```
-This automatically:
-- ✅ Generates documentation
-- ✅ Builds HTML
-- ✅ Starts enhanced web server
-- ✅ Opens browser with modern UI
-- ✅ Includes download features
-
-**Manual way:**
-```bash
-# Start enhanced server (auto-builds if needed)
 python docs_server.py
 ```
 
-**Features in the UI:**
-- 🎨 Modern, responsive design
-- 📥 Download as PDF, HTML (ZIP), or Markdown
-- 🔍 Enhanced search and navigation
-- 📱 Mobile-friendly layout
+Open `http://localhost:8000` to browse the Sphinx output. The UI includes search, navigation, and responsive styling.
 
-The documentation opens at `http://localhost:8000` with a beautiful interface!
-
-## 📖 Usage Examples
-
-### Example 1: Public Repository
-
-```bash
-python generate_docs.py https://github.com/dotnet/corefx
-```
-
-### Example 2: Private Repository
-
-```bash
-export GITHUB_TOKEN=your_github_token
-python generate_docs.py https://github.com/your-org/private-repo
-```
-
-### Example 3: Specific Branch
-
-```bash
-python generate_docs.py https://github.com/owner/repo develop
-```
-
-## 🏗️ Project Structure
+## Project Layout
 
 ```
 dotnet-ai-docgen/
-├── generate_docs.py          # Main entry point
-├── github_repo_handler.py    # GitHub repository operations
-├── dotnet_parser.py          # .NET project parsing
-├── ai_doc_generator.py       # AI-powered documentation generation
-├── requirements.txt          # Python dependencies
-├── .env                      # API keys (not in repo)
-└── docs/
-    ├── source/              # Generated RST files
-    └── build/               # Built HTML documentation
+├── web_app.py              # Flask UI + APIs
+├── generate_docs.py        # CLI entry point
+├── github_repo_handler.py  # Clones GitHub repositories
+├── language_parser.py      # Language-aware file discovery
+├── ai_doc_generator.py     # AI prompt logic
+├── docs_web/               # Sphinx source + HTML output
+├── docs_server.py          # Lightweight HTTP server
+├── requirements.txt        # Python dependencies
+├── FEATURE_ROADMAP.md      # Short-term and long-term plans
+├── HOW_TO_RUN.md           # Guided walkthrough
+├── QUICKSTART.md           # Minimal start steps
+├── GET_API_KEY.md          # OpenRouter key instructions
+├── FREE_AI_SETUP.md        # Free-mode guidance
+├── AZURE_OPENAI_SETUP.md   # Azure-specific instructions
+├── TROUBLESHOOTING.md      # Extended help
+└── README.md               # This summary
 ```
 
-## 🔧 How It Works
+## CI/CD Integration
 
-1. **Repository Cloning**: The tool clones the specified GitHub repository to a temporary directory
-2. **Project Discovery**: Parses the repository to find:
-   - Solution files (`.sln`)
-   - Project files (`.csproj`)
-   - All C# source files (`.cs`)
-3. **Code Analysis**: Extracts:
-   - Namespaces
-   - Classes and their methods
-   - Interfaces
-   - Enums
-4. **AI Documentation**: For each file and the overall project:
-   - Generates comprehensive documentation using AI
-   - Documents methods, parameters, return values
-   - Creates usage examples
-   - Provides architecture overview
-5. **Sphinx Generation**: Converts AI-generated content to RST format and builds HTML documentation
+The workflow at `.github/workflows/docs.yml` checks out the repo, installs dependencies, runs `python generate_docs.py`, builds the HTML (`cd docs && make html`), and publishes to GitHub Pages via `peaceiris/actions-gh-pages`. Adapt it for GitLab, Azure DevOps, or your own runner if needed.
 
-## 🎯 Generated Documentation Includes
+## Troubleshooting
 
-- **Project Overview**: Architecture, purpose, and key components
-- **File Documentation**: Detailed documentation for each C# file
-- **Class Documentation**: Purpose, methods, properties
-- **Method Documentation**: Parameters, return values, exceptions, examples
-- **Repository Information**: Stars, forks, description from GitHub
+- **No files detected**: Confirm the repository contains files for the selected language and that the branch exists.
+- **AI/API errors**: Validate your API keys, quotas, and rate limits.
+- **Git clone failures**: Ensure Git is installed and set `GITHUB_TOKEN` when cloning private repos.
+- **Missing PDF downloads**: Print or save from the viewer; download buttons were removed deliberately.
 
-## 🔐 Security Notes
+## Security
 
-- Never commit `.env` files to version control
-- Use GitHub Secrets for CI/CD pipelines
-- For private repositories, use a GitHub Personal Access Token
+- Never commit `.env` or secret files.
+- Store API keys and tokens in environment variables or GitHub Secrets for CI/CD.
+- Rotate keys regularly and use the minimum required scope.
 
-## 🤖 GitHub Actions Integration
+## Contribution & License
 
-Example workflow (`.github/workflows/docs.yml`):
-
-```yaml
-name: Generate Documentation
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      
-      - name: Generate documentation
-        env:
-          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
-          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
-        run: python generate_docs.py
-      
-      - name: Build documentation
-        run: |
-          cd docs
-          make html
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build/html
-```
-
-## 🐛 Troubleshooting
-
-### No C# files found
-- Ensure the repository contains `.cs` files
-- Check that the branch name is correct
-- Verify repository access (for private repos)
-
-### API errors
-- Verify your API keys are set correctly
-- Check API rate limits
-- Ensure you have sufficient credits/quota
-
-### Git clone errors
-- Ensure Git is installed and in PATH
-- For private repos, set `GITHUB_TOKEN`
-- Check repository URL format
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open issues or submit pull requests for improvements.
-
-## 🙏 Acknowledgments
-
-- Built with [Sphinx](https://www.sphinx-doc.org/)
-- AI-powered by Azure OpenAI, OpenAI, and OpenRouter
-- Documentation theme by [Read the Docs](https://sphinx-rtd-theme.readthedocs.io/)
+MIT License. Contributions, issues, and pull requests are welcome.

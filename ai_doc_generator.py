@@ -42,6 +42,90 @@ class AIDocGenerator:
             except Exception as e:
                 print(f"Warning: Could not initialize OpenAI: {e}")
     
+    def generate_angular_documentation(self, code: str, file_path: str) -> str:
+        """Generate documentation for Angular/TypeScript code."""
+        prompt = f"""You are an expert Angular/TypeScript developer and technical writer. Generate comprehensive documentation for the following Angular/TypeScript code.
+
+File: {file_path}
+
+Requirements:
+1. Provide a clear overview of the component/service/module purpose
+2. Document each public method, property, and decorator
+3. Explain Angular-specific features (@Component, @Injectable, etc.)
+4. Document inputs, outputs, and dependencies
+5. Include usage examples
+6. Format the output in reStructuredText (RST) format suitable for Sphinx
+
+Code:
+```typescript
+{code}
+```
+
+Generate comprehensive documentation in RST format:"""
+        
+        return self._call_ai_api(prompt)
+    
+    def generate_html_documentation(self, code: str, file_path: str) -> str:
+        """Generate documentation for HTML/CSS/JavaScript code."""
+        file_ext = file_path.split('.')[-1].lower()
+        
+        if file_ext == 'html':
+            prompt = f"""You are an expert web developer and technical writer. Generate comprehensive documentation for the following HTML code.
+
+File: {file_path}
+
+Requirements:
+1. Document the structure and purpose
+2. Explain key elements and their relationships
+3. Document any scripts, styles, or external resources
+4. Include accessibility considerations
+5. Format the output in reStructuredText (RST) format suitable for Sphinx
+
+HTML Code:
+```html
+{code}
+```
+
+Generate comprehensive documentation in RST format:"""
+        elif file_ext in ['css', 'scss']:
+            prompt = f"""You are an expert CSS developer and technical writer. Generate comprehensive documentation for the following CSS code.
+
+File: {file_path}
+
+Requirements:
+1. Document the styling approach and design system
+2. Explain key selectors and their purpose
+3. Document responsive breakpoints and media queries
+4. Include usage examples
+5. Format the output in reStructuredText (RST) format suitable for Sphinx
+
+CSS Code:
+```css
+{code}
+```
+
+Generate comprehensive documentation in RST format:"""
+        else:  # JavaScript
+            prompt = f"""You are an expert JavaScript developer and technical writer. Generate comprehensive documentation for the following JavaScript code.
+
+File: {file_path}
+
+Requirements:
+1. Provide a clear overview of the script's purpose
+2. Document each function, class, and method
+3. Explain parameters, return values, and side effects
+4. Include usage examples
+5. Format the output in reStructuredText (RST) format suitable for Sphinx
+
+JavaScript Code:
+```javascript
+{code}
+```
+
+Generate comprehensive documentation in RST format:"""
+        
+        return self._call_ai_api(prompt)
+    
     def generate_class_documentation(self, code: str, file_path: str, namespace: Optional[str] = None) -> str:
         """
         Generate documentation for a C# class or file.
@@ -197,34 +281,24 @@ Format the output in reStructuredText (RST) format suitable for Sphinx:"""
                     print(f"  Trying next free model... ({model} failed: {str(e)[:50]})")
                     continue
         
-        # Try without API key (OpenRouter free tier - no key needed!)
-        print("ℹ️  No API key found. Trying OpenRouter free tier (no key required)...")
-        for model in openrouter_models:
-            try:
-                response = requests.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={
-                        "HTTP-Referer": "https://github.com/IrushiGunawardana/dotnet-ai-docgen",
-                        "X-Title": "DotNet DocGen"
-                    },
-                    json={
-                        "model": model,
-                        "messages": [
-                            {"role": "system", "content": "You are an expert .NET software architect and technical writer."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": 0.3,
-                        "max_tokens": 4000
-                    },
-                    timeout=60
-                )
-                response.raise_for_status()
-                data = response.json()
-                print(f"✓ Using OpenRouter FREE model: {model} (no API key needed!)")
-                return data['choices'][0]['message']['content']
-            except Exception as e:
-                print(f"  Trying next free model... ({model} failed: {str(e)[:50]})")
-                continue
-        
-        raise Exception("All AI API calls failed. Please check your API keys or try again later.")
+        # OpenRouter now requires API key even for free models
+        # Provide helpful error message
+        error_msg = """
+❌ No AI API key configured!
+
+OpenRouter now requires a free API key even for free models.
+
+🔑 Get your FREE API key (takes 2 minutes, no credit card):
+   1. Visit: https://openrouter.ai
+   2. Sign up (free, no credit card required)
+   3. Go to: https://openrouter.ai/keys
+   4. Create a new key
+   5. Add to .env file: OPENROUTER_API_KEY=sk-or-v1-...
+
+💡 Alternative: Use Azure OpenAI or OpenAI API keys
+   See README.md for setup instructions.
+
+For more help, see: FREE_AI_SETUP.md
+"""
+        raise Exception(error_msg)
 

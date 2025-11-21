@@ -22,3 +22,9 @@ ENV/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Generated documentation
+docs/build/
+docs_web/build/
+docs_web/docs_web/build/
+docs_web/source/

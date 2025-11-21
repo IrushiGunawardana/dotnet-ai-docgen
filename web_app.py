@@ -9,6 +9,7 @@ import subprocess
 import webbrowser
 import threading
 import time
+import traceback
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
@@ -19,6 +20,7 @@ import shutil
 from github_repo_handler import GitHubRepoHandler
 from dotnet_parser import DotNetParser
 from ai_doc_generator import AIDocGenerator
+from language_parser import get_parser_for_language
 
 app = Flask(__name__, 
             template_folder='web_templates',
@@ -65,18 +67,20 @@ def get_repo_info():
             'branches': branches
         })
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/repo/files', methods=['POST'])
 def get_repo_files():
-    """Clone repository and list C# files."""
+    """Clone repository and list files based on language."""
     global current_repo_path
     
     try:
         data = request.json
         repo_url = data.get('repo_url')
         branch = data.get('branch', 'main')
+        language = data.get('language', 'dotnet')
         
         if not repo_url:
             return jsonify({'error': 'Repository URL is required'}), 400
@@ -94,19 +98,49 @@ def get_repo_files():
         repo_path = handler.clone_repository(temp_dir)
         current_repo_path = repo_path
         
-        # Parse files
-        parser = DotNetParser(repo_path)
-        parser.find_all_csharp_files()
+        # Parse files based on language
+        lang_parser = get_parser_for_language(language, repo_path)
+        try:
+            files = lang_parser.find_files()
+        except Exception as e:
+            return jsonify({'error': f'Parsing failed: {e}'}), 500
         
         files_list = []
-        for cs_file in parser.csharp_files:
-            files_list.append({
-                'path': cs_file.relative_path,
-                'namespace': cs_file.namespace or 'N/A',
-                'classes': len(cs_file.classes),
-                'interfaces': len(cs_file.interfaces),
-                'enums': len(cs_file.enums)
-            })
+        for file_info in files:
+            try:
+                parsed = lang_parser.parse_file(file_info['path'])
+            except Exception as e:
+                print(f"Warning: failed to parse {file_info['path']}: {e}")
+                parsed = {}
+            file_data = {
+                'path': file_info['relative_path'],
+                'type': file_info.get('type', 'unknown')
+            }
+            
+            # Add language-specific metadata
+            if language == 'dotnet':
+                file_data.update({
+                    'namespace': parsed.get('namespace', 'N/A'),
+                    'classes': parsed.get('classes_count', 0),
+                    'interfaces': 0,
+                    'enums': 0
+                })
+            elif language == 'angular':
+                file_data.update({
+                    'class_name': parsed.get('class_name', 'N/A'),
+                    'is_component': parsed.get('is_component', False),
+                    'is_service': parsed.get('is_service', False)
+                })
+            elif language == 'html':
+                if file_info['type'] == 'js':
+                    file_data.update({
+                        'functions': parsed.get('functions_count', 0),
+                        'classes': parsed.get('classes_count', 0)
+                    })
+                else:
+                    file_data.update(parsed)
+            
+            files_list.append(file_data)
         
         return jsonify({
             'success': True,
@@ -115,6 +149,207 @@ def get_repo_files():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/generate/code', methods=['POST'])
+def generate_from_code():
+    """Generate documentation from pasted code."""
+    global current_docs_dir, generation_status
+    
+    try:
+        data = request.json
+        code = data.get('code', '').strip()
+        filename = data.get('filename', 'Code.cs')
+        language = data.get('language', 'dotnet')
+        
+        if not code:
+            return jsonify({'error': 'Code is required'}), 400
+        
+        # Reset status
+        generation_status = {
+            'status': 'generating',
+            'progress': 0,
+            'message': 'Generating documentation from code...',
+            'files_processed': 0,
+            'total_files': 1
+        }
+        
+        # Run generation in background thread
+        thread = threading.Thread(
+            target=generate_code_docs_background,
+            args=(code, filename, language)
+        )
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Documentation generation started'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/generate/file', methods=['POST'])
+def generate_from_file():
+    """Generate documentation from uploaded file."""
+    global current_docs_dir, generation_status
+    
+    try:
+        data = request.json
+        code = data.get('code', '').strip()
+        filename = data.get('filename', 'uploaded.cs')
+        language = data.get('language', 'dotnet')
+        
+        if not code:
+            return jsonify({'error': 'File content is required'}), 400
+        
+        # Reset status
+        generation_status = {
+            'status': 'generating',
+            'progress': 0,
+            'message': 'Generating documentation from file...',
+            'files_processed': 0,
+            'total_files': 1
+        }
+        
+        # Run generation in background thread
+        thread = threading.Thread(
+            target=generate_code_docs_background,
+            args=(code, filename, language)
+        )
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Documentation generation started'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+def generate_code_docs_background(code, filename, language='dotnet'):
+    """Background task to generate documentation from code."""
+    global current_docs_dir, generation_status
+    
+    try:
+        # Create output directory
+        output_dir = Path("docs_web/source")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "_static").mkdir(exist_ok=True)
+        (output_dir / "_templates").mkdir(exist_ok=True)
+        
+        # Initialize AI generator
+        generator = AIDocGenerator()
+        
+        generation_status['message'] = 'Generating documentation...'
+        generation_status['progress'] = 30
+        
+        # Generate documentation based on language
+        try:
+            if language == 'dotnet':
+                doc_content = generator.generate_class_documentation(
+                    code=code,
+                    file_path=filename,
+                    namespace=None
+                )
+            elif language == 'angular':
+                doc_content = generator.generate_angular_documentation(
+                    code=code,
+                    file_path=filename
+                )
+            elif language == 'html':
+                doc_content = generator.generate_html_documentation(
+                    code=code,
+                    file_path=filename
+                )
+            else:
+                doc_content = generator.generate_class_documentation(
+                    code=code,
+                    file_path=filename,
+                    namespace=None
+                )
+        except Exception as e:
+            error_msg = str(e)
+            if "No AI API key" in error_msg or "API key" in error_msg:
+                generation_status['status'] = 'error'
+                generation_status['message'] = error_msg
+                return
+            else:
+                raise
+        
+        generation_status['progress'] = 60
+        generation_status['message'] = 'Creating documentation file...'
+        
+        # Create RST file
+        safe_name = filename.replace("\\", "_").replace("/", "_").replace(".cs", "")
+        rst_file = output_dir / f"{safe_name}.rst"
+        
+        title = filename.replace("\\", " / ").replace("/", " / ")
+        title_line = "=" * len(title)
+        
+        rst_content = f"""{title}
+{title_line}
+
+**File:** ``{filename}``
+
+{doc_content}
+"""
+        
+        with open(rst_file, "w", encoding="utf-8") as f:
+            f.write(rst_content)
+        
+        # Update index
+        index_content = f"""Documentation
+==============
+
+Welcome to the AI-generated documentation.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   {safe_name}
+"""
+        
+        index_file = output_dir / "index.rst"
+        with open(index_file, "w", encoding="utf-8") as f:
+            f.write(index_content)
+        
+        generation_status['progress'] = 80
+        generation_status['message'] = 'Building HTML documentation...'
+        
+        # Build HTML
+        docs_dir = Path("docs_web")
+        if os.name != 'nt':
+            result = subprocess.run(
+                ["sphinx-build", "-b", "html", "source", "build/html"],
+                cwd=docs_dir,
+                capture_output=True,
+                text=True
+            )
+        else:
+            result = subprocess.run(
+                ["sphinx-build", "-b", "html", "source", "build/html"],
+                cwd=docs_dir,
+                capture_output=True,
+                text=True,
+                shell=True
+            )
+        
+        if result.returncode == 0:
+            current_docs_dir = docs_dir / "build" / "html"
+            generation_status['status'] = 'completed'
+            generation_status['progress'] = 100
+            generation_status['message'] = 'Documentation generated successfully!'
+        else:
+            generation_status['status'] = 'error'
+            generation_status['message'] = f'Build failed: {result.stderr}'
+            
+    except Exception as e:
+        generation_status['status'] = 'error'
+        generation_status['message'] = f'Error: {str(e)}'
 
 
 @app.route('/api/generate', methods=['POST'])
@@ -127,6 +362,7 @@ def generate_documentation():
         repo_url = data.get('repo_url')
         branch = data.get('branch', 'main')
         selected_files = data.get('files', [])  # List of file paths
+        language = data.get('language', 'dotnet')
         
         if not repo_url:
             return jsonify({'error': 'Repository URL is required'}), 400
@@ -146,7 +382,7 @@ def generate_documentation():
         # Run generation in background thread
         thread = threading.Thread(
             target=generate_docs_background,
-            args=(repo_url, branch, selected_files)
+            args=(repo_url, branch, selected_files, language)
         )
         thread.daemon = True
         thread.start()
@@ -159,7 +395,7 @@ def generate_documentation():
         return jsonify({'error': str(e)}), 500
 
 
-def generate_docs_background(repo_url, branch, selected_files):
+def generate_docs_background(repo_url, branch, selected_files, language='dotnet'):
     """Background task to generate documentation."""
     global current_repo_path, current_docs_dir, generation_status
     
@@ -204,11 +440,20 @@ def generate_docs_background(repo_url, branch, selected_files):
                     code = f.read()
                 
                 # Generate documentation
-                doc_content = generator.generate_class_documentation(
-                    code=code,
-                    file_path=csharp_file.relative_path,
-                    namespace=csharp_file.namespace
-                )
+                try:
+                    doc_content = generator.generate_class_documentation(
+                        code=code,
+                        file_path=csharp_file.relative_path,
+                        namespace=csharp_file.namespace
+                    )
+                except Exception as e:
+                    error_msg = str(e)
+                    if "No AI API key" in error_msg or "API key" in error_msg:
+                        generation_status['status'] = 'error'
+                        generation_status['message'] = error_msg
+                        raise
+                    else:
+                        raise
                 
                 # Create RST file
                 safe_name = csharp_file.relative_path.replace("\\", "_").replace("/", "_").replace(".cs", "")
@@ -243,7 +488,16 @@ def generate_docs_background(repo_url, branch, selected_files):
         # Generate project overview
         generation_status['message'] = 'Generating project overview...'
         project_structure = parser.get_project_structure()
-        overview_content = generator.generate_project_overview(project_structure)
+        try:
+            overview_content = generator.generate_project_overview(project_structure)
+        except Exception as e:
+            error_msg = str(e)
+            if "No AI API key" in error_msg or "API key" in error_msg:
+                generation_status['status'] = 'error'
+                generation_status['message'] = error_msg
+                raise
+            else:
+                raise
         
         overview_rst = f"""Project Overview
 ===============
@@ -283,7 +537,7 @@ def generate_docs_background(repo_url, branch, selected_files):
             current_docs_dir = docs_dir / "build" / "html"
             generation_status['status'] = 'completed'
             generation_status['progress'] = 100
-            generation_status['message'] = 'Documentation generated successfully!'
+            generation_status['message'] = 'Documentation generated successfully! PDF download available.'
         else:
             generation_status['status'] = 'error'
             generation_status['message'] = f'Build failed: {result.stderr}'
@@ -345,38 +599,13 @@ def view_docs():
 
 @app.route('/docs/<path:filename>')
 def serve_docs(filename):
-    """Serve generated documentation files."""
+    """Serve the generated documentation files."""
     global current_docs_dir
-    
     if current_docs_dir and current_docs_dir.exists():
         return send_from_directory(str(current_docs_dir), filename)
-    else:
-        return "Documentation not found", 404
+    return "Documentation not found", 404
 
 
-@app.route('/api/download/<format>', methods=['GET'])
-def download_docs(format):
-    """Download documentation in various formats."""
-    global current_docs_dir
-    
-    if not current_docs_dir or not current_docs_dir.exists():
-        return jsonify({'error': 'Documentation not found'}), 404
-    
-    if format == 'html':
-        # Create ZIP
-        import zipfile
-        zip_path = tempfile.mktemp(suffix='.zip')
-        
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(current_docs_dir):
-                for file in files:
-                    file_path = Path(root) / file
-                    arcname = file_path.relative_to(current_docs_dir)
-                    zipf.write(file_path, arcname)
-        
-        return send_file(zip_path, as_attachment=True, download_name='documentation.zip')
-    
-    return jsonify({'error': 'Invalid format'}), 400
 
 
 if __name__ == '__main__':

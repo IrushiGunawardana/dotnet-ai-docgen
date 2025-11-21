@@ -88,7 +88,7 @@
             color: #333;
         }
 
-        input[type="text"], select {
+        input[type="text"], select, textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -97,9 +97,22 @@
             transition: border-color 0.3s;
         }
 
-        input[type="text"]:focus, select:focus {
+        input[type="text"]:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.85em;
+            margin: 0;
         }
 
         .btn {
@@ -285,17 +298,63 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-code"></i> .NET AI Documentation Generator</h1>
-            <p>Generate comprehensive documentation from GitHub repositories</p>
+            <h1><i class="fas fa-code"></i> AI Documentation Generator</h1>
+            <p>Generate comprehensive documentation for .NET, Angular, and HTML/CSS projects</p>
         </div>
 
         <div class="content">
             <div id="alert-container"></div>
 
-            <!-- Step 1: Repository Info -->
-            <div class="step">
+            <!-- Step 1: Language Selection -->
+            <div class="step" id="language-step">
                 <h2>
                     <span class="step-number">1</span>
+                    Select Programming Language
+                </h2>
+                <p style="margin-bottom: 20px; color: #666;">Choose the language of your codebase to generate appropriate documentation</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <button class="btn btn-primary language-btn" id="lang-dotnet" onclick="selectLanguage('dotnet')" style="flex-direction: column; padding: 20px; height: auto;">
+                        <i class="fab fa-microsoft" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <strong>.NET / C#</strong>
+                        <small style="display: block; margin-top: 5px; opacity: 0.9;">C# Classes, Methods, ASP.NET</small>
+                    </button>
+                    <button class="btn btn-secondary language-btn" id="lang-angular" onclick="selectLanguage('angular')" style="flex-direction: column; padding: 20px; height: auto;">
+                        <i class="fab fa-angular" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <strong>Angular</strong>
+                        <small style="display: block; margin-top: 5px; opacity: 0.9;">TypeScript, Components, Services</small>
+                    </button>
+                    <button class="btn btn-secondary language-btn" id="lang-html" onclick="selectLanguage('html')" style="flex-direction: column; padding: 20px; height: auto;">
+                        <i class="fab fa-html5" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <strong>HTML/CSS</strong>
+                        <small style="display: block; margin-top: 5px; opacity: 0.9;">HTML, CSS, JavaScript</small>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Input Method Selection -->
+            <div class="step hidden" id="method-step">
+                <h2>
+                    <span class="step-number">2</span>
+                    Choose Input Method
+                </h2>
+                <p style="margin-bottom: 20px; color: #666;" id="method-description">Select how you want to provide your code</p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+                    <button class="btn btn-primary" id="method-github" onclick="selectMethod('github')" style="flex: 1; min-width: 150px;">
+                        <i class="fab fa-github"></i> GitHub Repository
+                    </button>
+                    <button class="btn btn-secondary" id="method-paste" onclick="selectMethod('paste')" style="flex: 1; min-width: 150px;">
+                        <i class="fas fa-paste"></i> Copy-Paste Code
+                    </button>
+                    <button class="btn btn-secondary" id="method-upload" onclick="selectMethod('upload')" style="flex: 1; min-width: 150px;">
+                        <i class="fas fa-upload"></i> Upload File
+                    </button>
+                </div>
+            </div>
+
+            <!-- GitHub Repository Option -->
+            <div class="step hidden" id="github-option">
+                <h2>
+                    <span class="step-number">3</span>
                     Repository Information
                 </h2>
                 <div class="form-group">
@@ -314,10 +373,50 @@
                 </button>
             </div>
 
-            <!-- Step 2: File Selection -->
+            <!-- Copy-Paste Code Option -->
+            <div class="step hidden" id="paste-option">
+                <h2>
+                    <span class="step-number">3</span>
+                    Paste Your Code
+                </h2>
+                <div class="form-group">
+                    <label for="code-input" id="code-input-label">Code</label>
+                    <textarea id="code-input" rows="15" placeholder="Paste your code here..." style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.9em;"></textarea>
+                    <small style="color: #666; display: block; margin-top: 5px;" id="code-input-hint">Paste your code here</small>
+                </div>
+                <div class="form-group">
+                    <label for="code-filename">File Name (Optional)</label>
+                    <input type="text" id="code-filename" placeholder="e.g., MyClass.cs" style="width: 100%;">
+                </div>
+                <button class="btn btn-primary" onclick="processPastedCode()">
+                    <i class="fas fa-magic"></i> Generate Documentation
+                </button>
+            </div>
+
+            <!-- Upload File Option -->
+            <div class="step hidden" id="upload-option">
+                <h2>
+                    <span class="step-number">3</span>
+                    Upload File
+                </h2>
+                <div class="form-group">
+                    <label for="file-upload" id="file-upload-label">Select File</label>
+                    <input type="file" id="file-upload" accept="" onchange="handleFileSelect(event)" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <small style="color: #666; display: block; margin-top: 5px;" id="file-upload-hint">Upload a file (max 1MB)</small>
+                </div>
+                <div id="file-preview" class="hidden" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong>File Preview:</strong>
+                    <pre id="file-content" style="max-height: 200px; overflow-y: auto; margin-top: 10px; padding: 10px; background: white; border-radius: 4px; font-size: 0.85em;"></pre>
+                </div>
+                <button class="btn btn-primary" id="upload-generate-btn" onclick="processUploadedFile()" disabled>
+                    <i class="fas fa-magic"></i> Generate Documentation
+                </button>
+            </div>
+
+            <!-- Step 3: File Selection (GitHub only) -->
             <div class="step hidden" id="files-step">
                 <h2>
-                    <span class="step-number">2</span>
+                    <span class="step-number">3</span>
                     Select Files to Document
                 </h2>
                 <div class="select-all">
@@ -335,10 +434,10 @@
                 </div>
             </div>
 
-            <!-- Step 3: Progress -->
+            <!-- Step 4: Progress -->
             <div class="step hidden" id="progress-step">
                 <h2>
-                    <span class="step-number">3</span>
+                    <span class="step-number">4</span>
                     Generation Progress
                 </h2>
                 <div class="progress-container" id="progress-container">
@@ -349,18 +448,15 @@
                 </div>
             </div>
 
-            <!-- Step 4: View & Download -->
+            <!-- Step 5: View & Download -->
             <div class="step hidden" id="results-step">
                 <h2>
-                    <span class="step-number">4</span>
+                    <span class="step-number">5</span>
                     Documentation Ready!
                 </h2>
                 <div class="actions">
                     <button class="btn btn-primary" onclick="viewDocs()">
                         <i class="fas fa-eye"></i> View Documentation
-                    </button>
-                    <button class="btn btn-success" onclick="downloadDocs('html')">
-                        <i class="fas fa-download"></i> Download as ZIP
                     </button>
                 </div>
             </div>
@@ -370,6 +466,226 @@
     <script>
         let selectedFiles = [];
         let allFiles = [];
+        let currentMethod = 'github';
+        let currentLanguage = null;
+        let uploadedFileContent = null;
+        let uploadedFileName = null;
+
+        const languageConfig = {
+            dotnet: {
+                name: '.NET / C#',
+                extensions: ['.cs'],
+                accept: '.cs',
+                fileHint: 'Upload a .cs file (max 1MB)',
+                codeHint: 'Paste your C# class, method, or entire file code',
+                codeLabel: 'C# Code',
+                filenamePlaceholder: 'e.g., MyClass.cs',
+                methodDescription: 'Select how you want to provide your .NET/C# code'
+            },
+            angular: {
+                name: 'Angular',
+                extensions: ['.ts', '.html', '.css', '.scss'],
+                accept: '.ts,.html,.css,.scss',
+                fileHint: 'Upload a TypeScript, HTML, or CSS file (max 1MB)',
+                codeHint: 'Paste your Angular TypeScript component, service, or module code',
+                codeLabel: 'TypeScript/HTML Code',
+                filenamePlaceholder: 'e.g., app.component.ts',
+                methodDescription: 'Select how you want to provide your Angular code'
+            },
+            html: {
+                name: 'HTML/CSS',
+                extensions: ['.html', '.css', '.js'],
+                accept: '.html,.css,.js',
+                fileHint: 'Upload an HTML, CSS, or JavaScript file (max 1MB)',
+                codeHint: 'Paste your HTML, CSS, or JavaScript code',
+                codeLabel: 'HTML/CSS/JS Code',
+                filenamePlaceholder: 'e.g., index.html',
+                methodDescription: 'Select how you want to provide your HTML/CSS/JS code'
+            }
+        };
+
+        function selectLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update button styles
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            document.getElementById(`lang-${lang}`).classList.remove('btn-secondary');
+            document.getElementById(`lang-${lang}`).classList.add('btn-primary');
+            
+            // Show method selection
+            document.getElementById('method-step').classList.remove('hidden');
+            
+            // Update method description
+            const config = languageConfig[lang];
+            document.getElementById('method-description').textContent = config.methodDescription;
+            
+            // Update file upload settings
+            const fileUpload = document.getElementById('file-upload');
+            fileUpload.accept = config.accept;
+            document.getElementById('file-upload-label').textContent = `Select ${config.name} File`;
+            document.getElementById('file-upload-hint').textContent = config.fileHint;
+            
+            // Update code input settings
+            document.getElementById('code-input-label').textContent = config.codeLabel;
+            document.getElementById('code-input').placeholder = `Paste your ${config.name} code here...`;
+            document.getElementById('code-input-hint').textContent = config.codeHint;
+            document.getElementById('code-filename').placeholder = config.filenamePlaceholder;
+        }
+
+        function selectMethod(method) {
+            currentMethod = method;
+            
+            // Hide all options
+            document.getElementById('github-option').classList.add('hidden');
+            document.getElementById('paste-option').classList.add('hidden');
+            document.getElementById('upload-option').classList.add('hidden');
+            document.getElementById('files-step').classList.add('hidden');
+            document.getElementById('progress-step').classList.add('hidden');
+            document.getElementById('results-step').classList.add('hidden');
+            
+            // Reset button styles
+            document.getElementById('method-github').classList.remove('btn-primary');
+            document.getElementById('method-github').classList.add('btn-secondary');
+            document.getElementById('method-paste').classList.remove('btn-primary');
+            document.getElementById('method-paste').classList.add('btn-secondary');
+            document.getElementById('method-upload').classList.remove('btn-primary');
+            document.getElementById('method-upload').classList.add('btn-secondary');
+            
+            // Show selected option
+            if (method === 'github') {
+                document.getElementById('github-option').classList.remove('hidden');
+                document.getElementById('method-github').classList.remove('btn-secondary');
+                document.getElementById('method-github').classList.add('btn-primary');
+            } else if (method === 'paste') {
+                document.getElementById('paste-option').classList.remove('hidden');
+                document.getElementById('method-paste').classList.remove('btn-secondary');
+                document.getElementById('method-paste').classList.add('btn-primary');
+            } else if (method === 'upload') {
+                document.getElementById('upload-option').classList.remove('hidden');
+                document.getElementById('method-upload').classList.remove('btn-secondary');
+                document.getElementById('method-upload').classList.add('btn-primary');
+            }
+        }
+
+        function handleFileSelect(event) {
+            if (!currentLanguage) {
+                showAlert('Please select a language first', 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const config = languageConfig[currentLanguage];
+            const validExt = config.extensions.some(ext => file.name.toLowerCase().endsWith(ext));
+            
+            if (!validExt) {
+                showAlert(`Please upload a ${config.name} file (${config.extensions.join(', ')})`, 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            if (file.size > 1024 * 1024) { // 1MB limit
+                showAlert('File size must be less than 1MB', 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            uploadedFileName = file.name;
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                uploadedFileContent = e.target.result;
+                document.getElementById('file-content').textContent = uploadedFileContent.substring(0, 1000) + (uploadedFileContent.length > 1000 ? '...' : '');
+                document.getElementById('file-preview').classList.remove('hidden');
+                document.getElementById('upload-generate-btn').disabled = false;
+            };
+            
+            reader.readAsText(file);
+        }
+
+        async function processPastedCode() {
+            if (!currentLanguage) {
+                showAlert('Please select a language first', 'error');
+                return;
+            }
+            
+            const code = document.getElementById('code-input').value.trim();
+            const config = languageConfig[currentLanguage];
+            const defaultExt = config.extensions[0];
+            const filename = document.getElementById('code-filename').value.trim() || `Code${defaultExt}`;
+            
+            if (!code) {
+                showAlert('Please paste some code', 'error');
+                return;
+            }
+            
+            showAlert('Generating documentation...', 'info');
+            document.getElementById('progress-step').classList.remove('hidden');
+            document.getElementById('progress-container').style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/generate/code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        filename: filename,
+                        language: currentLanguage
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    pollStatus();
+                } else {
+                    showAlert(data.error || 'Failed to generate documentation', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function processUploadedFile() {
+            if (!currentLanguage) {
+                showAlert('Please select a language first', 'error');
+                return;
+            }
+            
+            if (!uploadedFileContent || !uploadedFileName) {
+                showAlert('Please upload a file first', 'error');
+                return;
+            }
+            
+            showAlert('Generating documentation...', 'info');
+            document.getElementById('progress-step').classList.remove('hidden');
+            document.getElementById('progress-container').style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/generate/file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: uploadedFileContent,
+                        filename: uploadedFileName,
+                        language: currentLanguage
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    pollStatus();
+                } else {
+                    showAlert(data.error || 'Failed to generate documentation', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
 
         async function loadBranches() {
             const repoUrl = document.getElementById('repo-url').value.trim();
@@ -434,6 +750,11 @@
         }
 
         async function loadFiles() {
+            if (!currentLanguage) {
+                showAlert('Please select a language first', 'error');
+                return;
+            }
+            
             const repoUrl = document.getElementById('repo-url').value.trim();
             const branch = document.getElementById('branch').value;
 
@@ -457,7 +778,11 @@
                 const response = await fetch('/api/repo/files', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ repo_url: repoUrl, branch: branch })
+                    body: JSON.stringify({ 
+                        repo_url: repoUrl, 
+                        branch: branch,
+                        language: currentLanguage
+                    })
                 });
 
                 const data = await response.json();
@@ -466,7 +791,8 @@
                     allFiles = data.files;
                     displayFiles(data.files);
                     document.getElementById('files-step').classList.remove('hidden');
-                    showAlert(`Found ${data.total} C# files`, 'success');
+                    const langName = currentLanguage === 'dotnet' ? 'C# files' : currentLanguage === 'angular' ? 'Angular files' : 'HTML/CSS/JS files';
+                    showAlert(`Found ${data.total} ${langName}`, 'success');
                 } else {
                     showAlert(data.error || 'Failed to load files', 'error');
                 }
@@ -485,16 +811,28 @@
             files.forEach(file => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
+                
+                // Build metadata based on language
+                let metadata = '';
+                if (currentLanguage === 'dotnet') {
+                    metadata = `Namespace: ${file.namespace || 'N/A'} | Classes: ${file.classes || 0} | Interfaces: ${file.interfaces || 0} | Enums: ${file.enums || 0}`;
+                } else if (currentLanguage === 'angular') {
+                    metadata = `Type: ${file.type || 'unknown'} | Class: ${file.class_name || 'N/A'} | Component: ${file.is_component ? 'Yes' : 'No'} | Service: ${file.is_service ? 'Yes' : 'No'}`;
+                } else if (currentLanguage === 'html') {
+                    if (file.type === 'js') {
+                        metadata = `Functions: ${file.functions || 0} | Classes: ${file.classes || 0}`;
+                    } else {
+                        metadata = `Type: ${file.type || 'unknown'}`;
+                    }
+                } else {
+                    metadata = `Type: ${file.type || 'unknown'}`;
+                }
+                
                 fileItem.innerHTML = `
                     <input type="checkbox" value="${file.path}" onchange="updateSelection()">
                     <div class="file-info">
                         <div class="file-path">${file.path}</div>
-                        <div class="file-meta">
-                            Namespace: ${file.namespace} | 
-                            Classes: ${file.classes} | 
-                            Interfaces: ${file.interfaces} | 
-                            Enums: ${file.enums}
-                        </div>
+                        <div class="file-meta">${metadata}</div>
                     </div>
                 `;
                 filesList.appendChild(fileItem);
@@ -520,6 +858,11 @@
         }
 
         async function generateDocs() {
+            if (!currentLanguage) {
+                showAlert('Please select a language first', 'error');
+                return;
+            }
+            
             if (selectedFiles.length === 0) {
                 showAlert('Please select at least one file', 'error');
                 return;
@@ -539,7 +882,8 @@
                     body: JSON.stringify({
                         repo_url: repoUrl,
                         branch: branch,
-                        files: selectedFiles
+                        files: selectedFiles,
+                        language: currentLanguage
                     })
                 });
 
@@ -584,6 +928,10 @@
         }
 
         async function downloadDocs(format) {
+            if (format === 'pdf') {
+                showAlert('Generating PDF... This may take a moment.', 'info');
+            }
+            
             try {
                 const response = await fetch(`/api/download/${format}`);
                 if (response.ok) {
@@ -596,9 +944,10 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
-                    showAlert('Download started!', 'success');
+                    showAlert(format === 'pdf' ? 'PDF downloaded successfully!' : 'Download started!', 'success');
                 } else {
-                    showAlert('Download failed', 'error');
+                    const errorData = await response.json().catch(() => ({error: 'Download failed'}));
+                    showAlert(errorData.error || 'Download failed', 'error');
                 }
             } catch (error) {
                 showAlert('Error: ' + error.message, 'error');
