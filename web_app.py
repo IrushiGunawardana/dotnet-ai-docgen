@@ -547,21 +547,13 @@ def generate_docs_background(repo_url, branch, selected_files, language='dotnet'
         generation_status['progress'] = 90
         
         docs_dir = docs_workspace
-        if os.name != 'nt':
-            result = subprocess.run(
-                ["sphinx-build", "-b", "html", "source", "build/html"],
-                cwd=docs_dir,
-                capture_output=True,
-                text=True
-            )
-        else:
-            result = subprocess.run(
-                ["sphinx-build", "-b", "html", "source", "build/html"],
-                cwd=docs_dir,
-                capture_output=True,
-                text=True,
-                shell=True
-            )
+        ensure_package('sphinx')
+        result = subprocess.run(
+            [sys.executable, "-m", "sphinx", "-b", "html", "source", "build/html"],
+            cwd=docs_dir,
+            capture_output=True,
+            text=True
+        )
         
         if result.returncode == 0:
             current_docs_dir = docs_dir / "build" / "html"
