@@ -53,7 +53,7 @@ This guide will walk you through obtaining your Azure OpenAI API key, endpoint, 
    - Click the **copy icon** next to KEY 1
    - This is your `AZURE_OPENAI_API_KEY`
 
-   ⚠️ **Important**: Keep this key secret! Never commit it to version control.
+   ️ **Important**: Keep this key secret! Never commit it to version control.
 
 ### Step 4: Create a Model Deployment
 
@@ -91,9 +91,9 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4
 ```
 
 2. **Replace the values**:
-   - `your_actual_key_here` → Your KEY 1 from Step 3
-   - `your-resource-name.openai.azure.com` → Your endpoint from Step 2
-   - `gpt-4` → Your deployment name from Step 4
+   - `your_actual_key_here`  Your KEY 1 from Step 3
+   - `your-resource-name.openai.azure.com`  Your endpoint from Step 2
+   - `gpt-4`  Your deployment name from Step 4
 
 ### Example .env File
 
@@ -107,9 +107,9 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4
 
 | What | Where to Find | Example |
 |------|---------------|---------|
-| **API Key** | Azure Portal → Your Resource → Keys and Endpoint → KEY 1 | `abc123...xyz` |
-| **Endpoint** | Azure Portal → Your Resource → Keys and Endpoint → Endpoint | `https://my-resource.openai.azure.com/` |
-| **Deployment** | Azure Portal → Your Resource → Model deployments → Deployment name | `gpt-4` |
+| **API Key** | Azure Portal  Your Resource  Keys and Endpoint  KEY 1 | `abc123...xyz` |
+| **Endpoint** | Azure Portal  Your Resource  Keys and Endpoint  Endpoint | `https://my-resource.openai.azure.com/` |
+| **Deployment** | Azure Portal  Your Resource  Model deployments  Deployment name | `gpt-4` |
 
 ## Troubleshooting
 
@@ -145,7 +145,7 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4
 ## Security Best Practices
 
 1. **Never commit `.env` to Git**
-   - Already in `.gitignore` ✅
+   - Already in `.gitignore` 
    - Use GitHub Secrets for CI/CD
 
 2. **Rotate keys regularly**

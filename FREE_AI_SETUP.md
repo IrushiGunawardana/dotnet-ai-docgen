@@ -2,7 +2,7 @@
 
 **Good news!** This tool works **completely FREE** - no paid API keys required!
 
-## ✅ Free Option: OpenRouter (No API Key Needed!)
+##  Free Option: OpenRouter (No API Key Needed!)
 
 OpenRouter provides **free AI models** that you can use without any API key or payment!
 
@@ -29,7 +29,7 @@ The tool will automatically try these free models (in order):
    - Good for documentation
    - Fast processing
 
-## 🚀 Quick Start (100% Free)
+##  Quick Start (100% Free)
 
 ### Option 1: No Configuration Needed (Easiest!)
 
@@ -65,21 +65,21 @@ While not required, getting a free OpenRouter API key gives you:
    OPENROUTER_API_KEY=sk-or-v1-...
    ```
 
-## 📊 Free Tier Limits
+##  Free Tier Limits
 
 ### Without API Key (Anonymous)
-- ✅ Unlimited requests
-- ✅ All free models available
-- ⚠️ Lower rate limits (may be slower during peak times)
+-  Unlimited requests
+-  All free models available
+- ️ Lower rate limits (may be slower during peak times)
 
 ### With Free API Key
-- ✅ Higher rate limits
-- ✅ Better reliability
-- ✅ Priority access to free models
-- ✅ Usage tracking dashboard
-- ✅ **Still 100% free!**
+-  Higher rate limits
+-  Better reliability
+-  Priority access to free models
+-  Usage tracking dashboard
+-  **Still 100% free!**
 
-## 🎯 Which Free Option Should I Use?
+##  Which Free Option Should I Use?
 
 | Scenario | Recommendation |
 |----------|---------------|
@@ -87,25 +87,25 @@ While not required, getting a free OpenRouter API key gives you:
 | Regular use | **Get free OpenRouter key** for better performance |
 | Production/CI/CD | **Get free OpenRouter key** for reliability |
 
-## 💡 Tips for Best Free Experience
+##  Tips for Best Free Experience
 
 1. **Be patient**: Free models may be slightly slower than paid ones
 2. **Smaller projects first**: Test with small repos to see results
 3. **Get the free API key**: Takes 2 minutes, improves experience significantly
 4. **Check model status**: If one free model is down, the tool automatically tries others
 
-## 🔄 How the Tool Chooses Models
+##  How the Tool Chooses Models
 
 The tool tries models in this order:
 
 1. **Azure OpenAI** (if configured - paid)
 2. **OpenAI** (if configured - paid)
 3. **OpenRouter with API key** (if configured - free)
-4. **OpenRouter without API key** (automatic - free) ← **You are here!**
+4. **OpenRouter without API key** (automatic - free)  **You are here!**
 
 So even if you don't configure anything, it will work!
 
-## ❓ FAQ
+##  FAQ
 
 ### Q: Is it really free?
 **A:** Yes! OpenRouter's free tier is completely free with no credit card required.
@@ -122,10 +122,10 @@ So even if you don't configure anything, it will work!
 ### Q: How do I know which model is being used?
 **A:** The tool prints which model it's using when it runs. Look for messages like:
 ```
-✓ Using OpenRouter FREE model: mistralai/mistral-7b-instruct:free (no API key needed!)
+ Using OpenRouter FREE model: mistralai/mistral-7b-instruct:free (no API key needed!)
 ```
 
-## 🎉 Ready to Go!
+##  Ready to Go!
 
 You're all set! Just run:
 
@@ -133,9 +133,9 @@ You're all set! Just run:
 python generate_docs.py https://github.com/your-username/your-repo
 ```
 
-No configuration needed - it will automatically use free AI models! 🚀
+No configuration needed - it will automatically use free AI models! 
 
-## 📚 Other Free Alternatives
+##  Other Free Alternatives
 
 If you want to explore other free options:
 

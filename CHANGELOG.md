@@ -4,14 +4,14 @@
 
 ### Major Enhancements
 
-#### 🎯 GitHub Repository Integration
+####  GitHub Repository Integration
 - **New**: `github_repo_handler.py` - Full GitHub repository cloning and access
 - Automatically clones any GitHub repository (public or private with token)
 - Fetches repository metadata (stars, forks, description)
 - Supports branch selection
 - Automatic cleanup of temporary directories
 
-#### 🔍 Advanced .NET Project Parsing
+####  Advanced .NET Project Parsing
 - **New**: `dotnet_parser.py` - Comprehensive .NET project analyzer
 - Discovers all solution files (`.sln`)
 - Finds all project files (`.csproj`)
@@ -19,7 +19,7 @@
 - Extracts namespaces, classes, methods, interfaces, and enums
 - Intelligent exclusion of build artifacts (bin, obj, etc.)
 
-#### 🤖 Multi-AI Support
+####  Multi-AI Support
 - **New**: `ai_doc_generator.py` - Unified AI documentation generator
 - **Azure OpenAI** support (recommended)
 - **OpenAI** API support
@@ -27,7 +27,7 @@
 - Automatic fallback between providers
 - Enhanced prompts for comprehensive documentation
 
-#### 📚 Comprehensive Documentation Generation
+####  Comprehensive Documentation Generation
 - **Enhanced**: `generate_docs.py` - Complete rewrite
 - Generates documentation for entire projects, not just single files
 - Creates project overview with architecture description

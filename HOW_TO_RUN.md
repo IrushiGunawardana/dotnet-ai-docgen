@@ -1,4 +1,4 @@
-# 🚀 How to Run the Documentation Generator
+#  How to Run the Documentation Generator
 
 ## Quick Start (3 Steps)
 
@@ -120,10 +120,10 @@ Manually open: `http://localhost:5000`
 
 ```
 .
-├── web_app.py          # Main web application
-├── .env                # Your API keys (create this!)
-├── requirements.txt    # Dependencies
-└── web_templates/      # UI files
+ web_app.py          # Main web application
+ .env                # Your API keys (create this!)
+ requirements.txt    # Dependencies
+ web_templates/      # UI files
 ```
 
 ## Need Help?
@@ -148,5 +148,5 @@ python generate_docs.py https://github.com/owner/repo
 python docs_server.py
 ```
 
-That's it! You're ready to generate documentation! 🎉
+That's it! You're ready to generate documentation! 
 

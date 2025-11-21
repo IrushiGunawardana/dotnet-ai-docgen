@@ -1,4 +1,4 @@
-# 🔑 Get Your FREE API Key (Required)
+#  Get Your FREE API Key (Required)
 
 ## Quick Setup (2 Minutes)
 
@@ -13,7 +13,7 @@ OpenRouter now requires an API key even for free models. Don't worry - it's **10
    - Google
    - Email
 
-**No credit card required!** ✅
+**No credit card required!** 
 
 ### Step 2: Get Your API Key
 
@@ -36,7 +36,7 @@ OPENROUTER_API_KEY=sk-or-v1-your-actual-key-here
 python web_app.py
 ```
 
-That's it! You're ready to generate documentation! 🎉
+That's it! You're ready to generate documentation! 
 
 ## Why Do I Need a Key?
 
@@ -46,10 +46,10 @@ OpenRouter requires API keys to:
 - Provide better service
 
 **You still get:**
-- ✅ Free models
-- ✅ No credit card
-- ✅ No charges
-- ✅ Better reliability
+-  Free models
+-  No credit card
+-  No charges
+-  Better reliability
 
 ## Troubleshooting
 
